@@ -1,7 +1,7 @@
 __author__ = 'JordSti'
 import threading
 import socket
-from packet import packet
+from packet import packet, packet_exception
 import random
 import hashlib
 import time
@@ -55,7 +55,11 @@ class handle_connection(threading.Thread):
         while self.connected:
             try:
                 recv_data = self.client.recv(self.buffer_size)
-                recv_packet = packet(recv_data)
+                try:
+                    recv_packet = packet(recv_data)
+                except packet_exception as e:
+                    self.master.debug("[%d] Invalid Packet, closing connection" % self.connection_id)
+                    self.connected = False
 
                 if recv_packet.packet_type == packet.ConnectionInit:
                     if self.user_id is None:
@@ -72,11 +76,17 @@ class handle_connection(threading.Thread):
                     send_packet = packet()
                     self.__send(send_packet)
                 elif recv_packet.packet_type == packet.Closing:
+                    self.master.debug("[%d] Client is closing connection" % self.connection_id)
                     self.connected = False
                 else:
                     # nothing to send
                     send_packet = packet()
                     self.client.__send(send_packet)
+
+            except socket.timeout:
+                #timeout hit
+                print "[%d] Client timed out, terminating thread" % self.connection_id
+                self.connected = False
 
             except socket.error as e:
                 self.master.debug("socket.error (%d, %s)" % (e.errno, e.strerror))

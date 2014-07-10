@@ -2,6 +2,25 @@ pydtxtedit
 ==========
 Python Distributed Text Editor
 
+How to make it work
+=====
+We are using PyQt4 for the Gui Client Side Application.
+
+To Launch the client
+
+Just run 'python client_form.py'
+
+To start a server : 'python server.py'
+
+To put the application in debug mode (server or client)
+
+Just add '-d' or '--debug'
+
+TO DO
+===
+-A Better script to run the client side application, like a main_client.py
+
+-many other things...
 
 Requirements
 ===

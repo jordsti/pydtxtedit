@@ -8,8 +8,10 @@ import sys
 
 class client:
     (BufferSize) = 2048
+    (NormalMode, DebugMode) = (0, 1)
 
-    def __init__(self, hostname, port=server.DefaultPort):
+    def __init__(self, hostname, port=server.DefaultPort, mode=NormalMode):
+        self.mode = mode
         self.hostname = hostname
         self.port = port
         self.connected = False
@@ -20,6 +22,19 @@ class client:
         self.received_packets = []
 
         self.buffer_size = self.BufferSize
+
+        #event handling
+        self.disconnected = None
+
+    def debug(self, message):
+        if self.mode == self.DebugMode:
+            print "[Debug] %s" % message
+
+        #output to log file maybe
+
+    def __disconnected(self):
+        if self.disconnected is not None:
+            self.disconnected()
 
     def connect(self):
         try:
@@ -44,7 +59,7 @@ class client:
 
                     if recv_packet.packet_type == packet.UserIdAssignation:
                         self.user_id = recv_packet.fields['user_id']
-                        print "User Id : %s" % self.user_id
+                        #print "User Id : %s" % self.user_id
                     elif recv_packet.packet_type == packet.Error:
                         print "Error packet : %s" % recv_packet.fields['message']
                 else:
@@ -55,10 +70,14 @@ class client:
                     recv_packet = self.__receive()
 
                     if recv_packet.packet_type == packet.Ping:
-                        print "Ping from server (%d)" % recv_packet.packet_id
+                        self.debug("Ping from server (%d)" % recv_packet.packet_id)
+
             except socket.error as e:
                 print "Socket error [%s, %s]" % (e.errno, e.strerror)
                 self.connected = False
+                self.__disconnected()
+
+            time.sleep(0.2) # little break
 
 
 
@@ -79,6 +98,8 @@ class client:
 
             self.__send(send_packet)
             self.connected = False
+
+            self.__disconnected()
 
 
 if  __name__ == '__main__':

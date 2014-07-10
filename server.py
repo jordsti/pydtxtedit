@@ -45,7 +45,8 @@ class server:
                 print "Accepting connection from %s:%d" % (address[0], address[1])
 
                 #thread creation
-
+                client.settimeout(1)
+                self.debug("Current threads count : %d" % len(self.threads))
                 if len(self.threads) < self.max_connections:
                     thread = handle_connection(client, address, self)
                     self.threads.append(thread)

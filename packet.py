@@ -56,7 +56,10 @@ class packet:
                         fdata = fvars[1]
                         self.fields[key] = fdata
         else:
-            raise packet_exception(0, "Parsing error [Raw Data: %s]" % text_data)
+            if text_data is None:
+                raise packet_exception(0, "Parsing error [Empty Packet]")
+            else:
+                raise packet_exception(1, "Parsing error [Raw Data: %s]" % text_data)
 
     def to_string(self):
         data = ""
