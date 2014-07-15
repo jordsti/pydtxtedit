@@ -18,6 +18,27 @@ def get_packet_id():
     return pid
 
 
+#character escaping chars
+chars_table = { ',' : '--COMMA--' }
+
+def escape_chars(text):
+    global chars_table
+
+    for k in chars_table:
+        text = text.replace(k, chars_table[k])
+
+    return text
+
+
+def unescape_chars(text):
+    global chars_table
+
+    for k in chars_table:
+        text = text.replace(chars_table[k], k)
+
+    return text
+
+
 class packet_exception(Exception):
     pass
 
@@ -54,7 +75,7 @@ class packet:
                     if len(fvars) == 2:
                         key = fvars[0]
                         fdata = fvars[1]
-                        self.fields[key] = fdata
+                        self.fields[key] = unescape_chars(fdata)
         else:
             if text_data is None:
                 raise packet_exception(0, "Parsing error [Empty Packet]")
@@ -65,7 +86,7 @@ class packet:
         data = ""
 
         for k in self.fields:
-            fdata = "%s:%s," % (k, self.fields[k])
+            fdata = "%s:%s," % (k, escape_chars(self.fields[k]))
             data += fdata
 
         data = data.rstrip(',')
