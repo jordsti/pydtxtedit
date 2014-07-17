@@ -91,6 +91,12 @@ class packet:
     def get_int(self, key):
         return int(self.fields[key])
 
+    def get_bool(self, key):
+        if self.fields[key] == 'True':
+            return True
+        else:
+            return False
+
     def to_string(self):
         data = ""
 
