@@ -82,6 +82,15 @@ class packet:
             else:
                 raise packet_exception(1, "Parsing error [Raw Data: %s]" % text_data)
 
+    def put_field(self, key, value):
+        self.fields[key] = value
+
+    def get_field(self, key):
+        return self.fields[key]
+
+    def get_int(self, key):
+        return int(self.fields[key])
+
     def to_string(self):
         data = ""
 
