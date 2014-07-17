@@ -44,7 +44,7 @@ class packet_exception(Exception):
 
 
 class packet:
-    (Error, Ping, ConnectionInit, UserIdAssignation, Closing) = (-1000, 0, 1, 2, 3)  # Other type to add
+    (Error, Ping, ConnectionInit, UserIdAssignation, Closing, Workspace) = (-1000, 0, 1, 2, 3, 4)  # Other type to add
 
     def __init__(self, text_data=None):
         self.packet_id = -1

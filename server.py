@@ -9,10 +9,10 @@ class server:
     (DefaultPort, DefaultWorkspace, MaxConnections) = (5656, 'workspace.txt', 25)
     (NormalMode, DebugMode) = (0, 1)
 
-    def __init__(self, port=DefaultPort, workspace=DefaultWorkspace, max_connections=MaxConnections, mode=NormalMode):
+    def __init__(self, port=DefaultPort, workspace_file=DefaultWorkspace, max_connections=MaxConnections, mode=NormalMode):
         self.mode = mode
         self.port = port
-        self.workspace = workspace
+        self.workspace_file = workspace_file
         self.max_connections = max_connections
 
         self.bind_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -23,7 +23,6 @@ class server:
     def debug(self, message):
         if self.mode == self.DebugMode:
             print "[Debug] %s" % message
-
         #todo logfile output
 
     def start(self):
