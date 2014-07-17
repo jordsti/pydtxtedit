@@ -67,6 +67,7 @@ class client:
                     if len(self.queued_packets) > 0:
                         q_packet = self.queued_packets[0]
                         self.__send(q_packet)
+                        print "queued packet send %s" % q_packet.to_string()
                         self.queued_packets.remove(q_packet)
                     else:
                         send_packet = packet()

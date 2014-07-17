@@ -79,6 +79,17 @@ class handle_connection(threading.Thread):
                 elif recv_packet.packet_type == packet.Closing:
                     self.master.debug("[%d] Client is closing connection" % self.connection_id)
                     self.connected = False
+                elif recv_packet.packet_type == packet.Right:
+                    self.master.debug("[%d] a client is asking for the right to write, packet id: (%d)" % (self.connection_id, recv_packet.packet_id))
+                    send_packet = packet()
+                    send_packet.packet_type = packet.Right
+                    if self.master.access_write is None:
+                        self.master.access_write = self.connection_id
+                        access = True
+                    else:
+                        access = False
+                    send_packet.ut_field("write", str(access))
+                    self.__send(send_packet)
                 else:
                     # nothing to send
                     send_packet = packet()

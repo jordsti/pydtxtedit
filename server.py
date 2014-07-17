@@ -14,7 +14,7 @@ class server:
         self.port = port
         self.workspace_file = workspace_file
         self.workspace = workspace.file_workspace(self.workspace_file)
-
+        self.access_write = None
         self.max_connections = max_connections
 
         self.bind_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
