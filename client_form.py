@@ -19,7 +19,10 @@ class client_thread(QtCore.QThread):
             self.form.append_log("Connected to %s:%d" % (self.hostname, self.port))
             self.form.lbl_status_value.setText("Connected")
             self.client.disconnected = self.disconnected
+
             #todo some event handling with client
+            self.form.btn_write_right.setEnabled(True)
+
             self.client.loop()
         else:
             self.form.append_log("Unable to etablish a connection with %s:%d" % (self.hostname, self.port))
@@ -83,6 +86,8 @@ class client_form(QtGui.QMainWindow):
         self.btn_give_up_right = QtGui.QPushButton("Release right")
         self.btn_give_up_right.setEnabled(False)
         self.btn_write_right.setEnabled(False)
+        self.btn_write_right.connect(self.btn_write_right, QtCore.SIGNAL('clicked()'), self.right_write_action)
+        self.btn_give_up_right.connect(self.btn_give_up_right, QtCore.SIGNAL('clicked()'), self.give_up_right_action)
 
         #textedit
         self.te_workspace = QtGui.QTextEdit()
@@ -110,13 +115,16 @@ class client_form(QtGui.QMainWindow):
         self.show()
 
     def append_log(self, message):
+        #TODO WORKSPACE-05
         self.te_log.insertPlainText(message + '\n')
+        self.te_log.moveCursor(QtGui.QTextCursor.End)
 
     def connect_dialog(self):
         d = client_dialog.connect_dialog(self)
         d.connect_trigger = self.connect_to_server
 
     def connect_to_server(self, hostname, port):
+        #WORKSPACE-01
         if self.connection_thread is None:
             self.connection_thread = client_thread(self, hostname, port)
             self.connection_thread.start()
@@ -124,6 +132,21 @@ class client_form(QtGui.QMainWindow):
     def disconnect_action(self):
         if self.connection_thread is not None:
             self.connection_thread.close()
+
+    def right_write_action(self):
+        #TODO WORKSPACE-03
+        #TODO send msg to server to have right to write
+        self.append_log("Asking server for right to write.")
+        self.btn_write_right.setEnabled(False)
+        #if right to write
+        #    self.btn_give_up_right.setEnabled(True)
+
+    def give_up_right_action(self):
+        #TODO WORKSPACE-04
+        #TODO send msg to server to release right to write
+        self.append_log("Asking server to give up my right to write.")
+        self.form.btn_write_right.setEnabled(True)
+        self.form.btn_give_up_right.setEnabled(False)
 
     def quit(self):
         self.disconnect_action()

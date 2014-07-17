@@ -79,8 +79,6 @@ class client:
 
             time.sleep(0.2) # little break
 
-
-
     def __receive(self):
         sock_data = self.socket.recv(self.buffer_size)
         recv_packet = packet(sock_data)
@@ -102,7 +100,7 @@ class client:
             self.__disconnected()
 
 
-if  __name__ == '__main__':
+if __name__ == '__main__':
     print "pydtxtedit Console client"
     print "GUI To implement..."
 
