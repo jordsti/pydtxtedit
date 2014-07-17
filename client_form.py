@@ -3,6 +3,7 @@ from PyQt4 import QtCore, QtGui
 import sys
 import client_dialog
 import client
+from packet import packet
 
 
 class client_thread(QtCore.QThread):
@@ -13,6 +14,11 @@ class client_thread(QtCore.QThread):
         self.hostname = hostname
         self.port = port
         self.client = client.client(self.hostname, self.port, self.form.mode)
+        self.right_updated = None
+
+    def __right_updated(self, enabled):
+        if self.right_updated is not None:
+            self.right_updated(enabled)
 
     def run(self):
         if self.client.connect():
@@ -22,6 +28,8 @@ class client_thread(QtCore.QThread):
 
             #todo some event handling with client
             self.form.btn_write_right.setEnabled(True)
+
+            #TODO send packet
 
             self.client.loop()
         else:
@@ -36,6 +44,9 @@ class client_thread(QtCore.QThread):
     def disconnected(self):
         self.form.lbl_status_value.setText("Not Connected")
         self.form.append_log("Disconnected from the server (%s:%d)" % (self.hostname, self.port))
+
+    def send_packet(self, packet):
+        self.client.queued_packets.append(packet)
 
 
 class client_form(QtGui.QMainWindow):
@@ -100,7 +111,7 @@ class client_form(QtGui.QMainWindow):
         self.lbl_status = QtGui.QLabel("Status :")
         self.lbl_status_value = QtGui.QLabel("Not Connected")
         self.lbl_textbox = QtGui.QLabel("Workspace")
-        self.lbl_log =  QtGui.QLabel("Message")
+        self.lbl_log = QtGui.QLabel("Message")
 
         #grid assign
         self.grid.addWidget(self.lbl_status, 0, 0, 1, 2)
@@ -127,17 +138,27 @@ class client_form(QtGui.QMainWindow):
         #WORKSPACE-01
         if self.connection_thread is None:
             self.connection_thread = client_thread(self, hostname, port)
+            self.connection_thread.right_updated = self.ninja
             self.connection_thread.start()
 
     def disconnect_action(self):
         if self.connection_thread is not None:
             self.connection_thread.close()
 
+    def ninja(self):
+        print "ninja test"
+
     def right_write_action(self):
         #TODO WORKSPACE-03
         #TODO send msg to server to have right to write
         self.append_log("Asking server for right to write.")
         self.btn_write_right.setEnabled(False)
+        #TODO send packet
+        q_packet = packet()
+        q_packet.packet_type = packet.Right
+        self.connection_thread.send_packet(q_packet)
+        #TODO receive packet
+
         #if right to write
         #    self.btn_give_up_right.setEnabled(True)
 

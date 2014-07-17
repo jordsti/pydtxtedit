@@ -18,6 +18,7 @@ class client:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.user_id = None
 
+        self.queued_packets = []
         self.sent_packets = []
         self.received_packets = []
 
@@ -63,9 +64,13 @@ class client:
                     elif recv_packet.packet_type == packet.Error:
                         print "Error packet : %s" % recv_packet.fields['message']
                 else:
-
-                    send_packet = packet()
-                    self.__send(send_packet)
+                    if len(self.queued_packets) > 0:
+                        q_packet = self.queued_packets[0]
+                        self.__send(q_packet)
+                        self.queued_packets.remove(q_packet)
+                    else:
+                        send_packet = packet()
+                        self.__send(send_packet)
 
                     recv_packet = self.__receive()
 
@@ -88,6 +93,9 @@ class client:
     def __send(self, to_send):
         self.sent_packets.append(to_send)
         self.socket.send(to_send.to_string())
+
+    def __queued(self, to_add):
+        self.queued_packets.append(to_add)
 
     def close(self):
         if self.connected:
