@@ -88,7 +88,7 @@ class handle_connection(threading.Thread):
                         access = True
                     else:
                         access = False
-                    send_packet.ut_field("write", str(access))
+                    send_packet.put_field("write", str(access))
                     self.__send(send_packet)
                 else:
                     # nothing to send
