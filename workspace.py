@@ -5,7 +5,7 @@ from packet import packet
 
 class workspace:
     def __init__(self, data=""):
-        self.data = ""
+        self.__data = data
 
     def get_workspace_packet(self):
         """
@@ -15,8 +15,8 @@ class workspace:
         """
         p = packet()
         p.packet_type = packet.Workspace
-        p.fields['length'] = len(self.data)
-        p.fields['content'] = self.data
+        p.fields['length'] = str(len(self.__data))
+        p.fields['content'] = self.__data
         return p
 
     def flush(self):
@@ -26,6 +26,20 @@ class workspace:
         """
         pass
 
+    def insert(self, offset, text):
+        if len(self.__data) > offset:
+            self.__data = self.__data[0:offset] + text + self.__data[offset+1:]
+        else:
+            self.__data += text
+
+    def append(self, text):
+        self.__data += text
+
+    def get_data(self):
+        return self.__data
+
+    def set_data(self, text):
+        self.__data = text
 
 
 class file_workspace(workspace):
@@ -51,18 +65,19 @@ class file_workspace(workspace):
         line = fp.readline()
 
         while len(line) > 0:
-            text += line + '\n'
+            text += line
+            line = fp.readline()
 
         if len(line) > 0:
-            text += line + '\n'
+            text += line
 
         fp.close()
 
-        self.data = text
+        self.set_data(text)
 
     def flush(self):
         fp = open(self.file_path, 'w')
-        fp.write(self.data)
+        fp.write(self.get_data())
         fp.close()
 
 
@@ -70,5 +85,10 @@ if __name__ == '__main__':
     print "Workspace Unit Test"
 
     fw = file_workspace('test.txt')
-    fw.data = "allo"
-    fw.flush()
+    #fw.__data = "allo"
+
+    pack_str = fw.get_workspace_packet().to_string()
+    print "Packet test"
+    p = packet(pack_str)
+
+    print p.to_string()

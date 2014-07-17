@@ -2,7 +2,7 @@ __author__ = 'JordSti'
 import socket
 import sys
 from handle_connection import handle_connection
-
+import workspace
 
 class server:
 
@@ -13,6 +13,8 @@ class server:
         self.mode = mode
         self.port = port
         self.workspace_file = workspace_file
+        self.workspace = workspace.file_workspace(self.workspace_file)
+
         self.max_connections = max_connections
 
         self.bind_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
