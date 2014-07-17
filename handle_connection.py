@@ -67,6 +67,7 @@ class handle_connection(threading.Thread):
                         send_packet = packet()
                         send_packet.packet_type = packet.UserIdAssignation
                         send_packet.fields['user_id'] = self.user_id
+                        send_packet.fields['workspace'] = self.master.workspace.get_data()
                         self.__send(send_packet)
                     else:
                         self.__error("User Id already assigned")
@@ -81,7 +82,7 @@ class handle_connection(threading.Thread):
                 else:
                     # nothing to send
                     send_packet = packet()
-                    self.client.__send(send_packet)
+                    self.__send(send_packet)
 
             except socket.timeout:
                 #timeout hit

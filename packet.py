@@ -59,7 +59,7 @@ class packet:
             self.fields = {}
 
     def __from_string(self, text_data):
-        packet_pattern = re.compile("\\[Packet:(?P<packet_id>[0-9]+):(?P<packet_type>[0-9]+)\\]\\((?P<packet_data>.*)\\)")
+        packet_pattern = re.compile("\\[Packet:(?P<packet_id>[0-9]+):(?P<packet_type>[0-9]+)\\]\\((?P<packet_data>.*)\\)", re.DOTALL)
 
         m = packet_pattern.match(text_data)
 
