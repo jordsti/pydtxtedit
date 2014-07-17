@@ -86,8 +86,8 @@ class client_form(QtGui.QMainWindow):
         self.btn_give_up_right = QtGui.QPushButton("Release right")
         self.btn_give_up_right.setEnabled(False)
         self.btn_write_right.setEnabled(False)
-        self.btn_write_right.connect(self.btn_write_right, QtCore.SIGNAL('clicked()'), self.right_write_action)
-        self.btn_give_up_right.connect(self.btn_give_up_right, QtCore.SIGNAL('clicked()'), self.give_up_right_action)
+        self.btn_write_right.clicked.connect(self.right_write_action)
+        self.btn_give_up_right.clicked.connect(self.give_up_right_action)
 
         #textedit
         self.te_workspace = QtGui.QTextEdit()
