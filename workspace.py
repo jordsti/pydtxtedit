@@ -7,6 +7,14 @@ class workspace:
     def __init__(self, data=""):
         self.__data = data
 
+    def clone(self):
+        """
+        Clone the current workspace data, useful to do a diff
+        :return:
+        """
+        w = workspace(self.__data)
+        return w
+
     def get_workspace_packet(self):
         """
         Generating a packet with all the text data
@@ -92,3 +100,12 @@ if __name__ == '__main__':
     p = packet(pack_str)
 
     print p.to_string()
+
+    #clone
+
+    w2 = fw.clone()
+
+    w2.insert(3, "aloooooo clone !!")
+
+    print fw.get_data()
+    print w2.get_data()

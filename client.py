@@ -2,6 +2,7 @@ __author__ = 'JordSti'
 import socket
 from server import server  # for default port
 from packet import packet
+import workspace
 import time
 import sys
 
@@ -17,6 +18,12 @@ class client:
         self.connected = False
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.user_id = None
+        self.workspace = workspace.workspace()
+
+        self.can_write = False
+
+        self.workspace_received = None
+        self.write_status_changed = None
 
         self.queued_packets = []
         self.sent_packets = []
@@ -26,6 +33,14 @@ class client:
 
         #event handling
         self.disconnected = None
+
+    def __workspace_received(self):
+        if self.workspace_received is not None:
+            self.workspace_received(self.workspace)
+
+    def __write_status_changed(self):
+        if self.write_status_changed is not None:
+            self.write_status_changed(self.can_write)
 
     def debug(self, message):
         if self.mode == self.DebugMode:
@@ -60,6 +75,9 @@ class client:
 
                     if recv_packet.packet_type == packet.UserIdAssignation:
                         self.user_id = recv_packet.fields['user_id']
+                        text_data = recv_packet.get_field("workspace")
+                        self.workspace.set_data(text_data)
+                        self.__workspace_received()
                         #print "User Id : %s" % self.user_id
                     elif recv_packet.packet_type == packet.Error:
                         print "Error packet : %s" % recv_packet.fields['message']
@@ -67,7 +85,7 @@ class client:
                     if len(self.queued_packets) > 0:
                         q_packet = self.queued_packets[0]
                         self.__send(q_packet)
-                        print "queued packet send %s" % q_packet.to_string()
+                        self.debug("queued packet send %s" % q_packet.to_string())
                         self.queued_packets.remove(q_packet)
                     else:
                         send_packet = packet()
@@ -77,6 +95,11 @@ class client:
 
                     if recv_packet.packet_type == packet.Ping:
                         self.debug("Ping from server (%d)" % recv_packet.packet_id)
+                    elif recv_packet.packet_type == packet.Right:
+                        can_write = recv_packet.get_bool('write')
+                        if not self.can_write == can_write:
+                            self.can_write = can_write
+                            self.__write_status_changed()
 
             except socket.error as e:
                 print "Socket error [%s, %s]" % (e.errno, e.strerror)

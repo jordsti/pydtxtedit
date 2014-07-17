@@ -8,6 +8,9 @@ from packet import packet
 
 class client_thread(QtCore.QThread):
 
+    workspace_received = QtCore.pyqtSignal(object) #signal for multi-thread support !
+    write_status_changed = QtCore.pyqtSignal(object)
+
     def __init__(self, form, hostname, port):
         QtCore.QThread.__init__(self)
         self.form = form
@@ -15,6 +18,14 @@ class client_thread(QtCore.QThread):
         self.port = port
         self.client = client.client(self.hostname, self.port, self.form.mode)
         self.right_updated = None
+        self.client.workspace_received = self.__workspace_received
+        self.client.write_status_changed = self.__write_status_changed
+
+    def __write_status_changed(self, can_write):
+        self.write_status_changed.emit(can_write)
+
+    def __workspace_received(self, workspace):
+        self.workspace_received.emit(workspace)
 
     def __right_updated(self, enabled):
         if self.right_updated is not None:
@@ -47,6 +58,12 @@ class client_thread(QtCore.QThread):
 
     def send_packet(self, packet):
         self.client.queued_packets.append(packet)
+
+    def release_right(self):
+        p = packet()
+        p.packet_type = packet.ReleaseRight
+        #todo need to send workspace diff with this
+        self.client.queued_packets.append(p)
 
 
 class client_form(QtGui.QMainWindow):
@@ -125,6 +142,18 @@ class client_form(QtGui.QMainWindow):
 
         self.show()
 
+    def workspace_received(self, workspace):
+        self.te_workspace.setText(workspace.get_data())
+
+    def write_status_changed(self, can_write):
+        #todo need to handle when the user is put into a queue!
+        if can_write:
+            self.btn_write_right.setEnabled(False)
+            self.btn_give_up_right.setEnabled(True)
+        else:
+            self.btn_give_up_right.setEnabled(False)
+            self.btn_write_right.setEnabled(True)
+
     def append_log(self, message):
         #TODO WORKSPACE-05
         self.te_log.insertPlainText(message + '\n')
@@ -138,7 +167,9 @@ class client_form(QtGui.QMainWindow):
         #WORKSPACE-01
         if self.connection_thread is None:
             self.connection_thread = client_thread(self, hostname, port)
-            self.connection_thread.right_updated = self.ninja
+            self.connection_thread.right_updated = self.ninja #todo
+            self.connection_thread.workspace_received.connect(self.workspace_received)
+            self.connection_thread.write_status_changed.connect(self.write_status_changed)
             self.connection_thread.start()
 
     def disconnect_action(self):
@@ -149,25 +180,28 @@ class client_form(QtGui.QMainWindow):
         print "ninja test"
 
     def right_write_action(self):
-        #TODO WORKSPACE-03
-        #TODO send msg to server to have right to write
-        self.append_log("Asking server for right to write.")
-        self.btn_write_right.setEnabled(False)
-        #TODO send packet
-        q_packet = packet()
-        q_packet.packet_type = packet.Right
-        self.connection_thread.send_packet(q_packet)
-        #TODO receive packet
+        if self.connection_thread is not None:
+            #TODO WORKSPACE-03
+            #TODO send msg to server to have right to write
+            self.append_log("Asking server for right to write.")
+            #self.btn_write_right.setEnabled(False)
+            #TODO send packet
+            q_packet = packet()
+            q_packet.packet_type = packet.Right
+            self.connection_thread.send_packet(q_packet)
+            #TODO receive packet
 
-        #if right to write
-        #    self.btn_give_up_right.setEnabled(True)
+            #if right to write
+            #    self.btn_give_up_right.setEnabled(True)
 
     def give_up_right_action(self):
         #TODO WORKSPACE-04
         #TODO send msg to server to release right to write
         self.append_log("Asking server to give up my right to write.")
-        self.form.btn_write_right.setEnabled(True)
-        self.form.btn_give_up_right.setEnabled(False)
+        #self.form.btn_write_right.setEnabled(True)
+        #self.form.btn_give_up_right.setEnabled(False)
+        if self.connection_thread is not None:
+            self.connection_thread.release_right()
 
     def quit(self):
         self.disconnect_action()

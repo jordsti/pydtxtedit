@@ -27,6 +27,11 @@ class server:
             print "[Debug] %s" % message
         #todo logfile output
 
+    def clean_connection(self, connection):
+        if self.access_write == connection.connection_id:
+            self.access_write = None
+            print "Removing write access from %d" % connection.connection_id
+
     def start(self):
         print "Starting pydtxtedit server"
         print "Listening on port %d" % self.port

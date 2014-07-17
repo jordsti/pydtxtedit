@@ -44,7 +44,7 @@ class packet_exception(Exception):
 
 
 class packet:
-    (Error, Ping, ConnectionInit, UserIdAssignation, Closing, Workspace, Right) = (-1000, 0, 1, 2, 3, 4, 5)  # Other type to add
+    (Error, Ping, ConnectionInit, UserIdAssignation, Closing, Workspace, Right, ReleaseRight) = (-1000, 0, 1, 2, 3, 4, 5, 6)  # Other type to add
 
     def __init__(self, text_data=None):
         self.packet_id = -1
@@ -83,7 +83,10 @@ class packet:
                 raise packet_exception(1, "Parsing error [Raw Data: %s]" % text_data)
 
     def put_field(self, key, value):
-        self.fields[key] = value
+        if value is str:
+            self.fields[key] = value
+        else:
+            self.fields[key] = str(value)
 
     def get_field(self, key):
         return self.fields[key]

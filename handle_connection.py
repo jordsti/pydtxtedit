@@ -90,6 +90,17 @@ class handle_connection(threading.Thread):
                         access = False
                     send_packet.put_field("write", str(access))
                     self.__send(send_packet)
+                elif recv_packet.packet_type == packet.ReleaseRight:
+                    if self.master.access_write == self.connection_id:
+                        self.master.access_write = None
+                        print "[%d] Releasing write access" % self.connection_id
+                        send_packet = packet()
+                        send_packet.packet_type = packet.Right
+                        send_packet.put_field('write', False)
+                        self.__send(send_packet)
+                    else:
+                        self.__error("You don't have the write access !")
+
                 else:
                     # nothing to send
                     send_packet = packet()
@@ -127,4 +138,5 @@ class handle_connection(threading.Thread):
         self.connected = False
         print "Connection %d ended" % self.connection_id
         self.client.close()
+        self.master.clean_connection(self)
         self.master.threads.remove(self)
