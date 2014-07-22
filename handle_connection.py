@@ -83,11 +83,16 @@ class handle_connection(threading.Thread):
                     self.master.debug("[%d] a client is asking for the right to write, packet id: (%d)" % (self.connection_id, recv_packet.packet_id))
                     send_packet = packet()
                     send_packet.packet_type = packet.Right
+
                     if self.master.access_write is None:
                         self.master.access_write = self.connection_id
                         access = True
                     else:
+                        #TODO WIP add into waiting list for the right
+                        self.master.debug("[%d] a client is added to the right to write waiting list, packet id: (%d)" % (self.connection_id, recv_packet.packet_id))
+                        self.master.access_waitings.append(self.connection_id)
                         access = False
+
                     send_packet.put_field("write", str(access))
                     self.__send(send_packet)
                 elif recv_packet.packet_type == packet.ReleaseRight:
@@ -98,6 +103,18 @@ class handle_connection(threading.Thread):
                         send_packet.packet_type = packet.Right
                         send_packet.put_field('write', False)
                         self.__send(send_packet)
+                        if len(self.master.access_waitings) > 0:
+                            succeeding = self.master.access_waitings[0]
+                            print "next one in line is: " + str(succeeding)
+                            self.master.access_waitings.remove(succeeding)
+                            send_packet = packet()
+                            send_packet.packet_type = packet.Right
+                            access = True
+                            send_packet.put_field("write", str(access))
+                            #FIXME need to send to the id of guy waiting in list
+                            #self.__send(send_packet)
+                        else:
+                            print "access_waiting is smaller <= 0"
                     else:
                         self.__error("You don't have the write access !")
 
@@ -126,7 +143,7 @@ class handle_connection(threading.Thread):
     def __error(self, message):
         error_packet = packet()
         error_packet.packet_type = packet.Error
-        error_packet.fields['message'] =  message
+        error_packet.fields['message'] = message
         print "[%d] Sending error packet..." % self.connection_id
         self.__send(error_packet)
 

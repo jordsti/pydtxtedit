@@ -20,9 +20,24 @@ class client_thread(QtCore.QThread):
         self.right_updated = None
         self.client.workspace_received = self.__workspace_received
         self.client.write_status_changed = self.__write_status_changed
+        self.client.write_status_quo = self.__write_status_quo
+
+
+    def __write_status_quo(self, can_write):
+        #FIXME why this line ???
+        if not can_write:
+            self.form.append_log("You are on the waiting list for the right")
+        else:
+            print "client form write status quo case not expected value: " + str(can_write)
 
     def __write_status_changed(self, can_write):
         self.write_status_changed.emit(can_write)
+        if can_write:
+            print "I can write " + str(can_write)
+            self.form.append_log("You possess the right to write.")
+        else:
+            print "I can't write: " + str(can_write)
+            self.form.append_log("You do not possess the right to write anymore.")
 
     def __workspace_received(self, workspace):
         self.workspace_received.emit(workspace)
@@ -37,10 +52,7 @@ class client_thread(QtCore.QThread):
             self.form.lbl_status_value.setText("Connected")
             self.client.disconnected = self.disconnected
 
-            #todo some event handling with client
             self.form.btn_write_right.setEnabled(True)
-
-            #TODO send packet
 
             self.client.loop()
         else:
@@ -167,7 +179,6 @@ class client_form(QtGui.QMainWindow):
         #WORKSPACE-01
         if self.connection_thread is None:
             self.connection_thread = client_thread(self, hostname, port)
-            self.connection_thread.right_updated = self.ninja #todo
             self.connection_thread.workspace_received.connect(self.workspace_received)
             self.connection_thread.write_status_changed.connect(self.write_status_changed)
             self.connection_thread.start()
@@ -176,30 +187,17 @@ class client_form(QtGui.QMainWindow):
         if self.connection_thread is not None:
             self.connection_thread.close()
 
-    def ninja(self):
-        print "ninja test"
-
     def right_write_action(self):
         if self.connection_thread is not None:
-            #TODO WORKSPACE-03
-            #TODO send msg to server to have right to write
+            #WORKSPACE-03
             self.append_log("Asking server for right to write.")
-            #self.btn_write_right.setEnabled(False)
-            #TODO send packet
             q_packet = packet()
             q_packet.packet_type = packet.Right
             self.connection_thread.send_packet(q_packet)
-            #TODO receive packet
-
-            #if right to write
-            #    self.btn_give_up_right.setEnabled(True)
 
     def give_up_right_action(self):
-        #TODO WORKSPACE-04
-        #TODO send msg to server to release right to write
+        #WORKSPACE-04
         self.append_log("Asking server to give up my right to write.")
-        #self.form.btn_write_right.setEnabled(True)
-        #self.form.btn_give_up_right.setEnabled(False)
         if self.connection_thread is not None:
             self.connection_thread.release_right()
 

@@ -4,6 +4,7 @@ import sys
 from handle_connection import handle_connection
 import workspace
 
+
 class server:
 
     (DefaultPort, DefaultWorkspace, MaxConnections) = (5656, 'workspace.txt', 25)
@@ -15,6 +16,8 @@ class server:
         self.workspace_file = workspace_file
         self.workspace = workspace.file_workspace(self.workspace_file)
         self.access_write = None
+        #WIP GESTION-02
+        self.access_waitings = []
         self.max_connections = max_connections
 
         self.bind_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

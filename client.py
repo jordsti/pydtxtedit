@@ -41,6 +41,13 @@ class client:
     def __write_status_changed(self):
         if self.write_status_changed is not None:
             self.write_status_changed(self.can_write)
+            #TODO write if you got the right
+            #TODO if release before got right do we remove it from list in server ??
+
+    def __write_status_quo(self, can_write):
+        if self.write_status_quo is not None:
+            #case possible: you don't have the right and ask for it ?
+            self.write_status_quo(can_write)
 
     def debug(self, message):
         if self.mode == self.DebugMode:
@@ -97,9 +104,14 @@ class client:
                         self.debug("Ping from server (%d)" % recv_packet.packet_id)
                     elif recv_packet.packet_type == packet.Right:
                         can_write = recv_packet.get_bool('write')
+                        #my right change
                         if not self.can_write == can_write:
+                            #FIXME why not just pass can_write in param to __write_status_changed???
                             self.can_write = can_write
                             self.__write_status_changed()
+                        else:
+                            #FIXME maybe receive is number in line before he got the right ??
+                            self.__write_status_quo(self.can_write)
 
             except socket.error as e:
                 print "Socket error [%s, %s]" % (e.errno, e.strerror)
