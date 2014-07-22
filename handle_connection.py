@@ -33,6 +33,7 @@ class handle_connection(threading.Thread):
         self.user_id = None
 
         self.sent_packets = []
+        self.queued_packets = []
 
     def __generate_user_id(self):
         if self.user_id is None:
@@ -54,6 +55,11 @@ class handle_connection(threading.Thread):
 
         while self.connected:
             try:
+                if len(self.queued_packets) > 0:
+                    queued_packet = self.queued_packets[0]
+                    self.__send(queued_packet)
+                    self.queued_packets.remove(queued_packet)
+
                 recv_data = self.client.recv(self.buffer_size)
                 try:
                     recv_packet = packet(recv_data)
@@ -68,17 +74,19 @@ class handle_connection(threading.Thread):
                         send_packet.packet_type = packet.UserIdAssignation
                         send_packet.fields['user_id'] = self.user_id
                         send_packet.fields['workspace'] = self.master.workspace.get_data()
-                        self.__send(send_packet)
+                        self.queued_packets.append(send_packet)
                     else:
                         self.__error("User Id already assigned")
                 elif recv_packet.packet_type == packet.Ping:
                     #sending a ping
                     self.master.debug("[%d] Ping from client (%d)" % (self.connection_id, recv_packet.packet_id))
                     send_packet = packet()
-                    self.__send(send_packet)
+                    self.queued_packets.append(send_packet)
+
                 elif recv_packet.packet_type == packet.Closing:
                     self.master.debug("[%d] Client is closing connection" % self.connection_id)
                     self.connected = False
+
                 elif recv_packet.packet_type == packet.Right:
                     self.master.debug("[%d] a client is asking for the right to write, packet id: (%d)" % (self.connection_id, recv_packet.packet_id))
                     send_packet = packet()
@@ -94,7 +102,9 @@ class handle_connection(threading.Thread):
                         access = False
 
                     send_packet.put_field("write", str(access))
-                    self.__send(send_packet)
+
+                    self.queued_packets.append(send_packet)
+
                 elif recv_packet.packet_type == packet.ReleaseRight:
                     if self.master.access_write == self.connection_id:
                         self.master.access_write = None
@@ -103,16 +113,13 @@ class handle_connection(threading.Thread):
                         send_packet.packet_type = packet.Right
                         send_packet.put_field('write', False)
                         self.__send(send_packet)
+
                         if len(self.master.access_waitings) > 0:
+                            print "Release right someone is waiting for right"
                             succeeding = self.master.access_waitings[0]
                             print "next one in line is: " + str(succeeding)
-                            self.master.access_waitings.remove(succeeding)
-                            send_packet = packet()
-                            send_packet.packet_type = packet.Right
-                            access = True
-                            send_packet.put_field("write", str(access))
-                            #FIXME need to send to the id of guy waiting in list
-                            #self.__send(send_packet)
+                            self.master.next_waiting()
+
                         else:
                             print "access_waiting is smaller <= 0"
                     else:
@@ -145,11 +152,25 @@ class handle_connection(threading.Thread):
         error_packet.packet_type = packet.Error
         error_packet.fields['message'] = message
         print "[%d] Sending error packet..." % self.connection_id
+        #FIXME should pass by the queued ???
         self.__send(error_packet)
 
     def __send(self, to_send):
         self.sent_packets.append(to_send)
         self.client.send(to_send.to_string())
+
+    def next_inline(self):
+        if self.master.access_write is None:
+            print "next inline process"
+            self.master.access_write = self.connection_id
+            send_packet = packet()
+            send_packet.packet_type = packet.Right
+            access = True
+            send_packet.put_field("write", str(access))
+            self.queued_packets.append(send_packet)
+            print "Next inline packet: " + send_packet.to_string()
+        else:
+            print "handle connection, next inline case not implemented "
 
     def terminate(self):
         self.connected = False

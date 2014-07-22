@@ -10,6 +10,7 @@ class client_thread(QtCore.QThread):
 
     workspace_received = QtCore.pyqtSignal(object) #signal for multi-thread support !
     write_status_changed = QtCore.pyqtSignal(object)
+    write_status_quo = QtCore.pyqtSignal(object)
 
     def __init__(self, form, hostname, port):
         QtCore.QThread.__init__(self)
@@ -22,9 +23,8 @@ class client_thread(QtCore.QThread):
         self.client.write_status_changed = self.__write_status_changed
         self.client.write_status_quo = self.__write_status_quo
 
-
     def __write_status_quo(self, can_write):
-        #FIXME why this line ???
+        self.write_status_changed.emit(can_write)
         if not can_write:
             self.form.append_log("You are on the waiting list for the right")
         else:

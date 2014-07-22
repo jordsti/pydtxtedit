@@ -47,7 +47,7 @@ GESTION-01 : Le système doit garantir que les droits d'écriture ne sont accord
 du système. #completed
 
 GESTION-02 : Le système doit gérer les demandes de droits d'écriture concurrentes à l'aide d'une file 
-FIFO (« First In, First Out ») et attribuer les droits d'écriture aux utilisateurs selon l'ordre de la file. 
+FIFO (« First In, First Out ») et attribuer les droits d'écriture aux utilisateurs selon l'ordre de la file.
 
 GESTION-03 : Le système doit transmettre le texte édité de l'utilisateur qui délaisse ses droits d'écriture 
 à tous les autres espaces de travail qui y sont connectés. 

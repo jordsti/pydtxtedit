@@ -25,6 +25,23 @@ class server:
         self.run = True
         self.threads = []
 
+    def next_waiting(self):
+        if len(self.access_waitings) > 0:
+            success = False
+            succeeding = self.access_waitings[0]
+
+            for thread in self.threads:
+                print "thread id: " + str(thread.connection_id) + " / waiting id: " + str(succeeding)
+
+                if thread.connection_id == succeeding:
+                    print "find one with the same id"
+                    thread.next_inline()
+                    success = True
+
+            if success:
+                #FIXME only if success to send msg ???
+                self.access_waitings.remove(succeeding)
+
     def debug(self, message):
         if self.mode == self.DebugMode:
             print "[Debug] %s" % message
