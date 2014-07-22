@@ -154,6 +154,7 @@ class handle_connection(threading.Thread):
     def terminate(self):
         self.connected = False
         print "Connection %d ended" % self.connection_id
+        #todo handle if the client has write right or is in the waiting list
         self.client.close()
         self.master.clean_connection(self)
         self.master.threads.remove(self)

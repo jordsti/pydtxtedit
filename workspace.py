@@ -1,7 +1,7 @@
 __author__ = 'JordSti'
 import os
 from packet import packet
-
+from workspace_diff import line_diff, workspace_diff
 
 class workspace:
     def __init__(self, data=""):
@@ -14,6 +14,64 @@ class workspace:
         """
         w = workspace(self.__data)
         return w
+
+    def apply_diff(self, diff):
+        lines = self.__data.split('\n')
+        offset = 0
+        for ld in diff.lines_diff:
+            if ld.diff_type == line_diff.LineChanged:
+                lines[ld.line_id] = ld.line_data
+            elif ld.diff_type == line_diff.LineAdded:
+                lines.append(ld.line_data)
+            elif ld.diff_type == line_diff.LineRemoved:
+                if len(lines) > ld.line_id - offset:
+                    lines.pop(ld.line_id - offset)
+                    offset += 1
+
+        data = ""
+        for l in lines:
+            data += "%s\n" % l
+
+        data = data.rstrip('\n')
+
+        self.__data = data
+
+
+
+    def diff(self, new_workspace):
+        diff = workspace_diff()
+
+        lines = self.__data.split('\n')
+
+        nw_lines = new_workspace.get_data().split('\n')
+
+        ic = len(lines)
+        nw_ic = len(nw_lines)
+
+        i = 0
+
+        while i < ic and i < nw_ic:
+            cur_line = lines[i]
+            new_line = nw_lines[i]
+
+            if not cur_line == new_line:
+                ld = line_diff(i, line_diff.LineChanged, new_line)
+                diff.lines_diff.append(ld)
+            i += 1
+
+        if ic < nw_ic:
+            while i < nw_ic:
+                new_line = nw_lines[i]
+                ld = line_diff(i, line_diff.LineAdded, new_line)
+                diff.lines_diff.append(ld)
+                i += 1
+        elif ic > nw_ic:
+            while i < ic:
+                ld = line_diff(i, line_diff.LineRemoved)
+                diff.lines_diff.append(ld)
+                i += 1
+
+        return diff
 
     def get_workspace_packet(self):
         """
@@ -109,3 +167,25 @@ if __name__ == '__main__':
 
     print fw.get_data()
     print w2.get_data()
+
+    _diff = fw.diff(w2)
+
+    w3 = workspace()
+
+    w3.set_data("bl balb daijfosdjfoisd kfosd kfsd")
+
+    print _diff.to_string()
+    _diff2 = fw.diff(w3)
+
+    p = packet()
+
+    _diff2.fill_packet(p)
+
+    _diff3 = workspace_diff(p.fields['diff'])
+    print _diff3.to_string()
+
+    fw.apply_diff(_diff3)
+
+    print w3.get_data()
+    print "---------------"
+    print fw.get_data()
