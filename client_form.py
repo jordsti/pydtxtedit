@@ -86,14 +86,20 @@ class client_form(QtGui.QMainWindow):
     def workspace_received(self, workspace):
         self.te_workspace.setText(workspace.get_data())
 
-    def write_status_changed(self, can_write):
+    def write_status_changed(self, status):
         #todo need to handle when the user is put into a queue!
-        if can_write:
+        if status.can_write:
             self.btn_write_right.setEnabled(False)
             self.btn_give_up_right.setEnabled(True)
+            self.te_workspace.setEnabled(True)
+        elif not status.can_write and status.is_waiting:
+            self.btn_give_up_right.setEnabled(True)
+            self.btn_write_right.setEnabled(False)
+            self.te_workspace.setEnabled(False)
         else:
             self.btn_give_up_right.setEnabled(False)
             self.btn_write_right.setEnabled(True)
+            self.te_workspace.setEnabled(False)
 
     def append_log(self, message):
         #TODO WORKSPACE-05
@@ -128,6 +134,7 @@ class client_form(QtGui.QMainWindow):
         #WORKSPACE-04
         self.append_log("Asking server to give up my right to write.")
         if self.connection_thread is not None:
+            self.connection_thread.client.make_diff(str(self.te_workspace.toPlainText()))
             self.connection_thread.release_right()
 
     def quit(self):

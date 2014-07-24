@@ -44,6 +44,9 @@ class workspace_diff:
                 ld.from_string(d)
                 self.lines_diff.append(ld)
 
+    def is_empty(self):
+        return len(self.lines_diff) == 0
+
     def to_string(self):
         txt = "workspace_diff:\n"
         for d in self.lines_diff:

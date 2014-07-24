@@ -19,22 +19,22 @@ class client_thread(QtCore.QThread):
         self.right_updated = None
         self.client.workspace_received = self.__workspace_received
         self.client.write_status_changed = self.__write_status_changed
-        self.client.write_status_quo = self.__write_status_quo
+        self.client.write_status_quo = self.__write_status_quo  # todo to be removed
 
-    def __write_status_quo(self, can_write):
-        self.write_status_changed.emit(can_write)
-        if not can_write:
+    def __write_status_quo(self, status):
+        self.write_status_changed.emit(status)
+        if status.is_waiting:
             self.form.append_log("You are on the waiting list for the right")
         else:
-            print "client form write status quo case not expected value: " + str(can_write)
+            print "client form write status quo case not expected value: " + str(status.can_write)
 
-    def __write_status_changed(self, can_write):
-        self.write_status_changed.emit(can_write)
-        if can_write:
-            print "I can write " + str(can_write)
+    def __write_status_changed(self, status):
+        self.write_status_changed.emit(status)
+        if status.can_write:
+            print "I can write " + str(status.can_write)
             self.form.append_log("You possess the right to write.")
-        else:
-            print "I can't write: " + str(can_write)
+        elif status.is_waiting:
+            print "I can't write: " + str(status.can_write)
             self.form.append_log("You do not possess the right to write anymore.")
 
     def __workspace_received(self, workspace):

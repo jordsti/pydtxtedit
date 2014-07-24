@@ -7,6 +7,12 @@ import time
 import sys
 
 
+class client_status:
+    def __init__(self, can_write=False, is_waiting=False):
+        self.can_write = can_write
+        self.is_waiting = is_waiting
+
+
 class client:
     (BufferSize) = 2048
     (NormalMode, DebugMode) = (0, 1)
@@ -19,8 +25,10 @@ class client:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.user_id = None
         self.workspace = workspace.workspace()
+        self.pending_diff = None
 
         self.can_write = False
+        self.is_waiting = False
 
         self.workspace_received = None
         self.write_status_changed = None
@@ -34,20 +42,31 @@ class client:
         #event handling
         self.disconnected = None
 
+    def make_diff(self, new_text):
+        new_workspace = workspace.workspace(new_text)
+        diff = self.workspace.diff(new_workspace)
+        if not diff.is_empty():
+            self.pending_diff = diff
+            print diff.to_string()
+            #todo send diff with release right
+
+    def get_client_status(self):
+        return client_status(self.can_write, self.is_waiting)
+
     def __workspace_received(self):
         if self.workspace_received is not None:
             self.workspace_received(self.workspace)
 
     def __write_status_changed(self):
         if self.write_status_changed is not None:
-            self.write_status_changed(self.can_write)
+            self.write_status_changed(self.get_client_status())
             #TODO write if you got the right
             #TODO if release before got right do we remove it from list in server ??
 
-    def __write_status_quo(self, can_write):
+    def __write_status_quo(self):   #todo to be removed
         if self.write_status_quo is not None:
             #case possible: you don't have the right and ask for it ?
-            self.write_status_quo(can_write)
+            self.write_status_quo(self.get_client_status())
 
     def debug(self, message):
         if self.mode == self.DebugMode:
@@ -104,14 +123,13 @@ class client:
                         self.debug("Ping from server (%d)" % recv_packet.packet_id)
                     elif recv_packet.packet_type == packet.Right:
                         can_write = recv_packet.get_bool('write')
-                        #my right change
-                        if not self.can_write == can_write:
-                            #FIXME why not just pass can_write in param to __write_status_changed???
-                            self.can_write = can_write
-                            self.__write_status_changed()
-                        else:
-                            #FIXME maybe receive is number in line before he got the right ??
-                            self.__write_status_quo(self.can_write)
+                        #FIXME why not just pass can_write in param to __write_status_changed???
+                        self.can_write = can_write
+                        self.is_waiting = not can_write
+                        self.__write_status_changed()
+                        #else:
+                        #FIXME maybe receive is number in line before he got the right ??
+                        #    self.__write_status_quo()
 
             except socket.error as e:
                 print "Socket error [%s, %s]" % (e.errno, e.strerror)
