@@ -122,9 +122,12 @@ class handle_connection(threading.Thread):
                         else:
                             print "access_waiting is smaller <= 0"
                     elif self.connection_id in self.master.access_queued:
+                        #TODO release right when in waiting list
                         print "Releasing right when in waiting list: %d" % self.connection_id
                         queued_item = self.master.access_queued.__getitem__(self.connection_id)
                         self.master.access_queued.remove(queued_item)
+                        send_packet = packet()
+                        self.__send(send_packet)
                     else:
                         self.__error("You don't have the write access !")
 
