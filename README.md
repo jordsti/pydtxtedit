@@ -22,6 +22,18 @@ TO DO
 
 -many other things...
 
+
+Qualité de l'implémentation [9%]
+======================
+Votre application sera pondérée quant à la qualité de votre implémentation. Les critères suivants seront considérés lors de la correction:
+
+-Transparence
+-Performance
+-Extensibilité en fonction du contexte du projet
+-Tolérance aux fautes
+-Documentation
+=======================
+
 Contexte
 ===
 -l'utilisateur peut lire dans l'espace de travail la derniere version du text editee par lui ou un autre utilisateur

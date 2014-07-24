@@ -16,8 +16,7 @@ class server:
         self.workspace_file = workspace_file
         self.workspace = workspace.file_workspace(self.workspace_file)
         self.access_write = None
-        #WIP GESTION-02
-        self.access_waitings = []
+        self.access_queued = []
         self.max_connections = max_connections
 
         self.bind_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -26,9 +25,9 @@ class server:
         self.threads = []
 
     def next_waiting(self):
-        if len(self.access_waitings) > 0:
+        if len(self.access_queued) > 0:
             success = False
-            succeeding = self.access_waitings[0]
+            succeeding = self.access_queued[0]
 
             for thread in self.threads:
                 print "thread id: " + str(thread.connection_id) + " / waiting id: " + str(succeeding)
@@ -40,7 +39,11 @@ class server:
 
             if success:
                 #FIXME only if success to send msg ???
-                self.access_waitings.remove(succeeding)
+                self.access_queued.remove(succeeding)
+
+    def adding_access_queued(self, connection_id):
+        if not connection_id in self.access_queued:
+            self.access_queued.append(connection_id)
 
     def debug(self, message):
         if self.mode == self.DebugMode:

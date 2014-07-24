@@ -96,9 +96,9 @@ class handle_connection(threading.Thread):
                         self.master.access_write = self.connection_id
                         access = True
                     else:
-                        #TODO WIP add into waiting list for the right
                         self.master.debug("[%d] a client is added to the right to write waiting list, packet id: (%d)" % (self.connection_id, recv_packet.packet_id))
-                        self.master.access_waitings.append(self.connection_id)
+                        #FIXME should not add more than once client
+                        self.master.adding_access_queued(self.connection_id)
                         access = False
 
                     send_packet.put_field("write", str(access))
@@ -114,9 +114,9 @@ class handle_connection(threading.Thread):
                         send_packet.put_field('write', False)
                         self.__send(send_packet)
 
-                        if len(self.master.access_waitings) > 0:
+                        if len(self.master.access_queued) > 0:
                             print "Release right someone is waiting for right"
-                            succeeding = self.master.access_waitings[0]
+                            succeeding = self.master.access_queued[0]
                             print "next one in line is: " + str(succeeding)
                             self.master.next_waiting()
 
