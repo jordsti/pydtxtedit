@@ -97,7 +97,6 @@ class handle_connection(threading.Thread):
                         access = True
                     else:
                         self.master.debug("[%d] a client is added to the right to write waiting list, packet id: (%d)" % (self.connection_id, recv_packet.packet_id))
-                        #FIXME should not add more than once client
                         self.master.adding_access_queued(self.connection_id)
                         access = False
 
@@ -118,10 +117,14 @@ class handle_connection(threading.Thread):
                             print "Release right someone is waiting for right"
                             succeeding = self.master.access_queued[0]
                             print "next one in line is: " + str(succeeding)
-                            self.master.next_waiting()
+                            self.master.next_in_queued()
 
                         else:
                             print "access_waiting is smaller <= 0"
+                    elif self.connection_id in self.master.access_queued:
+                        print "Releasing right when in waiting list: %d" % self.connection_id
+                        queued_item = self.master.access_queued.__getitem__(self.connection_id)
+                        self.master.access_queued.remove(queued_item)
                     else:
                         self.__error("You don't have the write access !")
 
@@ -140,7 +143,6 @@ class handle_connection(threading.Thread):
                 if e.errno == 10054:
                     print "Connection closed by the client..."
                     self.connected = False
-                    #todo some cleanup if he gots the write right on the workspace
 
             #little nap for the cpu
             time.sleep(0.3)
@@ -152,7 +154,6 @@ class handle_connection(threading.Thread):
         error_packet.packet_type = packet.Error
         error_packet.fields['message'] = message
         print "[%d] Sending error packet..." % self.connection_id
-        #FIXME should pass by the queued ???
         self.__send(error_packet)
 
     def __send(self, to_send):
@@ -175,7 +176,6 @@ class handle_connection(threading.Thread):
     def terminate(self):
         self.connected = False
         print "Connection %d ended" % self.connection_id
-        #todo handle if the client has write right or is in the waiting list
         self.client.close()
         self.master.clean_connection(self)
         self.master.threads.remove(self)

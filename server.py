@@ -24,7 +24,7 @@ class server:
         self.run = True
         self.threads = []
 
-    def next_waiting(self):
+    def next_in_queued(self):
         if len(self.access_queued) > 0:
             success = False
             succeeding = self.access_queued[0]
@@ -38,7 +38,6 @@ class server:
                     success = True
 
             if success:
-                #FIXME only if success to send msg ???
                 self.access_queued.remove(succeeding)
 
     def adding_access_queued(self, connection_id):
@@ -54,6 +53,9 @@ class server:
         if self.access_write == connection.connection_id:
             self.access_write = None
             print "Removing write access from %d" % connection.connection_id
+        if connection.connection_id in self.access_queued:
+            self.access_queued.remove(connection.connection_id)
+            print "Removing in right access queued: %d" % connection.connection_id
 
     def start(self):
         print "Starting pydtxtedit server"
