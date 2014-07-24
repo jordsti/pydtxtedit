@@ -53,6 +53,8 @@ class server:
         if self.access_write == connection.connection_id:
             self.access_write = None
             print "Removing write access from %d" % connection.connection_id
+            self.next_in_queued()
+
         if connection.connection_id in self.access_queued:
             self.access_queued.remove(connection.connection_id)
             print "Removing in right access queued: %d" % connection.connection_id
