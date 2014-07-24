@@ -46,6 +46,7 @@ Requirements
 WORKSPACE-01 : L'espace de travail doit permettre à un utilisateur de se connecter au système à l'aide 
 d'une adresse IP et d'un numéro de port.
 
+#completed
 WORKSPACE-02 : L'espace de travail doit permettre l'insertion, la modification et la suppression de 
 texte. 
 
@@ -62,6 +63,7 @@ système. Ce bouton doit être désactivé pendant que les droits ne sont pas po
 WORKSPACE-05 : L'espace de travail doit afficher clairement à l'utilisateur les messages reliés aux droits 
 d'accès (demande reçue par le système, demande accordée, droits d'accès délaissés, etc.).
 
+#WIP
 WORKSPACE-06 : L'espace de travail doit mettre à jour l'affichage du texte édité par les autres 
 utilisateurs du système sans intervention de l'utilisateur. 
 
@@ -69,7 +71,7 @@ utilisateurs du système sans intervention de l'utilisateur.
 GESTION-01 : Le système doit garantir que les droits d'écriture ne sont accordés qu'à un seul utilisateur 
 du système.
 
-#completed need more test with 3 or more client and when a client close without releasing right and ...
+#completed
 GESTION-02 : Le système doit gérer les demandes de droits d'écriture concurrentes à l'aide d'une file 
 FIFO (« First In, First Out ») et attribuer les droits d'écriture aux utilisateurs selon l'ordre de la file.
 
@@ -80,3 +82,6 @@ GESTION-03 : Le système doit transmettre le texte édité de l'utilisateur qui 
 #completed
 GESTION-04 : Le système doit informer clairement les utilisateurs de l'utilisateur qui possède les droits 
 d'écriture à travers le système lorsqu'une acquisition ou un délaissement surviennent.
+
+#TODO
+Algo du tp
