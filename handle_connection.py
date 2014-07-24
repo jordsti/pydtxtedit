@@ -91,6 +91,8 @@ class handle_connection(threading.Thread):
                     self.master.debug("[%d] a client is asking for the right to write, packet id: (%d)" % (self.connection_id, recv_packet.packet_id))
                     send_packet = packet()
                     send_packet.packet_type = packet.Right
+                    access = False
+                    is_waiting = False
 
                     if self.master.access_write is None:
                         self.master.access_write = self.connection_id
@@ -99,8 +101,10 @@ class handle_connection(threading.Thread):
                         self.master.debug("[%d] a client is added to the right to write waiting list, packet id: (%d)" % (self.connection_id, recv_packet.packet_id))
                         self.master.adding_access_queued(self.connection_id)
                         access = False
+                        is_waiting = True
 
                     send_packet.put_field("write", str(access))
+                    send_packet.put_field("is_waiting", str(is_waiting))
 
                     self.queued_packets.append(send_packet)
 
@@ -110,7 +114,8 @@ class handle_connection(threading.Thread):
                         print "[%d] Releasing write access" % self.connection_id
                         send_packet = packet()
                         send_packet.packet_type = packet.Right
-                        send_packet.put_field('write', False)
+                        send_packet.put_field('write', str(False))
+                        send_packet.put_field('is_waiting', str(False))
                         self.__send(send_packet)
 
                         if len(self.master.access_queued) > 0:

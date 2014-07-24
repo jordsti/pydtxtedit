@@ -121,11 +121,13 @@ class client:
 
                     if recv_packet.packet_type == packet.Ping:
                         self.debug("Ping from server (%d)" % recv_packet.packet_id)
+
                     elif recv_packet.packet_type == packet.Right:
                         can_write = recv_packet.get_bool('write')
+                        is_waiting = recv_packet.get_bool('is_waiting')
                         #FIXME why not just pass can_write in param to __write_status_changed???
                         self.can_write = can_write
-                        self.is_waiting = not can_write
+                        self.is_waiting = is_waiting
                         self.__write_status_changed()
                         #else:
                         #FIXME maybe receive is number in line before he got the right ??
