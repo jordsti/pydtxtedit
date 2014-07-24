@@ -35,6 +35,8 @@ class client_thread(QtCore.QThread):
             self.form.append_log("You possess the right to write.")
         elif status.is_waiting:
             print "I can't write: " + str(status.can_write)
+            self.form.append_log("You are now in the waiting list...")
+        else:
             self.form.append_log("You do not possess the right to write anymore.")
 
     def __workspace_received(self, workspace):

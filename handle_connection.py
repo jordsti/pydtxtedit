@@ -91,7 +91,6 @@ class handle_connection(threading.Thread):
                     self.master.debug("[%d] a client is asking for the right to write, packet id: (%d)" % (self.connection_id, recv_packet.packet_id))
                     send_packet = packet()
                     send_packet.packet_type = packet.Right
-                    access = False
                     is_waiting = False
 
                     if self.master.access_write is None:
@@ -103,7 +102,7 @@ class handle_connection(threading.Thread):
                         access = False
                         is_waiting = True
 
-                    send_packet.put_field("write", str(access))
+                    send_packet.put_field("can_write", str(access))
                     send_packet.put_field("is_waiting", str(is_waiting))
 
                     self.queued_packets.append(send_packet)
@@ -114,22 +113,27 @@ class handle_connection(threading.Thread):
                         print "[%d] Releasing write access" % self.connection_id
                         send_packet = packet()
                         send_packet.packet_type = packet.Right
-                        send_packet.put_field('write', str(False))
+                        send_packet.put_field('can_write', str(False))
                         send_packet.put_field('is_waiting', str(False))
                         self.__send(send_packet)
 
                         if len(self.master.access_queued) > 0:
-                            print "Release right someone is waiting for right"
+                            print "[%d] Release right someone is waiting for right" % self.connection_id
                             succeeding = self.master.access_queued[0]
-                            print "next one in line is: " + str(succeeding)
+                            print "[%d] next one in line is: %d" % (self.connection_id, succeeding)
                             self.master.next_in_queued()
 
                         else:
-                            print "access_waiting is smaller <= 0"
+                            print "[%d] access_waiting is smaller <= 0" % self.connection_id
                     elif self.connection_id in self.master.access_queued:
-                        print "Releasing right when in waiting list: %d" % self.connection_id
-                        queued_item = self.master.access_queued.__getitem__(self.connection_id)
-                        self.master.access_queued.remove(queued_item)
+                        print "[%d] Releasing right when in waiting list: %d" % (self.connection_id, self.connection_id)
+                        #queued_item = self.master.access_queued.__getitem__(self.connection_id)
+                        self.master.access_queued.remove(self.connection_id)
+                        send_packet = packet()
+                        send_packet.packet_type = packet.Right
+                        send_packet.put_field("can_write", False)
+                        send_packet.put_field("is_waiting", False)
+                        self.__send(send_packet)
                     else:
                         self.__error("You don't have the write access !")
 
@@ -172,7 +176,8 @@ class handle_connection(threading.Thread):
             send_packet = packet()
             send_packet.packet_type = packet.Right
             access = True
-            send_packet.put_field("write", str(access))
+            send_packet.put_field("can_write", str(access))
+            send_packet.put_field("is_waiting", False)
             self.queued_packets.append(send_packet)
             print "Next inline packet: " + send_packet.to_string()
         else:
