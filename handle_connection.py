@@ -5,6 +5,7 @@ from packet import packet, packet_exception
 import random
 import hashlib
 import time
+import workspace_diff
 
 
 #global vars
@@ -109,6 +110,18 @@ class handle_connection(threading.Thread):
 
                 elif recv_packet.packet_type == packet.ReleaseRight:
                     if self.master.access_write == self.connection_id:
+
+                        diff_data = recv_packet.get_field("diff")
+
+                        diff = workspace_diff.workspace_diff(diff_data)
+
+                        if not diff.is_empty():
+                            self.master.workspace.apply_diff(diff)
+                            self.master.workspace.flush()
+
+                            #send the diff to other client !!
+                            self.__workspace_update(diff)
+
                         self.master.access_write = None
                         print "[%d] Releasing write access" % self.connection_id
                         send_packet = packet()
@@ -156,6 +169,15 @@ class handle_connection(threading.Thread):
             time.sleep(0.3)
 
         self.terminate()
+
+    def __workspace_update(self, diff):
+        for c in self.master.threads:
+            if not c.connection_id == self.connection_id:
+                p = packet()
+                p.packet_type = packet.WorkspaceUpdate
+                p = diff.fill_packet(p)
+                c.queued_packets.append(p)
+
 
     def __error(self, message):
         error_packet = packet()

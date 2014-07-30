@@ -11,7 +11,7 @@ class line_diff:
         self.line_data = line_data
 
     def from_string(self, data):
-        pattern = re.compile("i:(?P<line_id>[0-9]+) type:(?P<type>[0-9]+) data:(?P<data>.*)")
+        pattern = re.compile("i=(?P<line_id>[0-9]+) type=(?P<type>[0-9]+) data=(?P<data>.*)")
 
         m = pattern.match(data)
 
@@ -24,7 +24,7 @@ class line_diff:
             print "line_diff parsing error [%s]" % data
 
     def to_string(self):
-        return "i:%d type:%d data:%s" % (self.line_id, self.diff_type, self.line_data)
+        return "i=%d type=%d data=%s" % (self.line_id, self.diff_type, self.line_data)
 
 class workspace_diff:
     (LineDiffSeparator) = '--L_D--'
@@ -61,3 +61,5 @@ class workspace_diff:
             data += "%s%s" % (ld.to_string(), self.LineDiffSeparator)
 
         packet.fields['diff'] = data
+
+        return packet

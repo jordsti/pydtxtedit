@@ -3,6 +3,7 @@ import socket
 from server import server  # for default port
 from packet import packet
 import workspace
+import workspace_diff
 import time
 import sys
 
@@ -45,10 +46,10 @@ class client:
     def make_diff(self, new_text):
         new_workspace = workspace.workspace(new_text)
         diff = self.workspace.diff(new_workspace)
-        if not diff.is_empty():
-            self.pending_diff = diff
-            print diff.to_string()
-            #todo send diff with release right
+
+        self.workspace.apply_diff(diff)
+        return diff
+
 
     def get_client_status(self):
         return client_status(self.can_write, self.is_waiting)
@@ -132,6 +133,13 @@ class client:
                         #else:
                         #FIXME maybe receive is number in line before he got the right ??
                         #    self.__write_status_quo()
+                    elif recv_packet.packet_type == packet.WorkspaceUpdate:
+                        diff_data = recv_packet.get_field("diff")
+                        diff = workspace_diff.workspace_diff(diff_data)
+
+                        if not diff.is_empty():
+                            self.workspace.apply_diff(diff)
+                            self.__workspace_received()
 
             except socket.error as e:
                 print "Socket error [%s, %s]" % (e.errno, e.strerror)

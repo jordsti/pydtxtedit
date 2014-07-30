@@ -71,8 +71,10 @@ class client_thread(QtCore.QThread):
     def send_packet(self, packet):
         self.client.queued_packets.append(packet)
 
-    def release_right(self):
+    def release_right(self, diff):
         p = packet()
         p.packet_type = packet.ReleaseRight
+        p = diff.fill_packet(p)
+
         #todo need to send workspace diff with this
         self.client.queued_packets.append(p)

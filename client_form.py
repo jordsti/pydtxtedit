@@ -134,8 +134,8 @@ class client_form(QtGui.QMainWindow):
         #WORKSPACE-04
         self.append_log("Asking server to give up my right to write.")
         if self.connection_thread is not None:
-            self.connection_thread.client.make_diff(str(self.te_workspace.toPlainText()))
-            self.connection_thread.release_right()
+            diff = self.connection_thread.client.make_diff(str(self.te_workspace.toPlainText()))
+            self.connection_thread.release_right(diff)
 
     def quit(self):
         self.disconnect_action()
