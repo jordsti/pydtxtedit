@@ -16,11 +16,17 @@ To put the application in debug mode (server or client)
 
 Just add '-d' or '--debug'
 
-TO DO
-===
--A Better script to run the client side application, like a main_client.py
+### TO DO
 
--many other things...
+ - Who possess the write token !?!
+ 
+ - Username (Random names list, server took a random name when the user initiate the connection)
+
+ - Lamport Logic Clock [Wikipedia page](http://en.wikipedia.org/wiki/Lamport_timestamps)
+ 
+ - Ricart–Agrawala algorithm [Wikipedia page](http://en.wikipedia.org/wiki/Ricart%E2%80%93Agrawala_algorithm)
+
+
 
 
 Qualité de l'implémentation [9%]
