@@ -9,6 +9,9 @@ class client_thread(QtCore.QThread):
     workspace_received = QtCore.pyqtSignal(object) #signal for multi-thread support !
     write_status_changed = QtCore.pyqtSignal(object)
     write_status_quo = QtCore.pyqtSignal(object)
+    write_update = QtCore.pyqtSignal(object)
+    user_assigned = QtCore.pyqtSignal(object)
+    message_received = QtCore.pyqtSignal(object)
 
     def __init__(self, form, hostname, port):
         QtCore.QThread.__init__(self)
@@ -20,6 +23,18 @@ class client_thread(QtCore.QThread):
         self.client.workspace_received = self.__workspace_received
         self.client.write_status_changed = self.__write_status_changed
         self.client.write_status_quo = self.__write_status_quo  # todo to be removed
+        self.client.write_update = self.__write_update
+        self.client.user_assigned = self.__user_assigned
+        self.client.message_received = self.__message_received
+
+    def __message_received(self, message):
+        self.message_received.emit(message)
+
+    def __user_assigned(self):
+        self.user_assigned.emit(self.client.user_id)
+
+    def __write_update(self, user_id):
+        self.write_update.emit(user_id)
 
     def __write_status_quo(self, status):
         self.write_status_changed.emit(status)

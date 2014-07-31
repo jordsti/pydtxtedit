@@ -70,16 +70,20 @@ class client_form(QtGui.QMainWindow):
         self.lbl_status_value = QtGui.QLabel("Not Connected")
         self.lbl_textbox = QtGui.QLabel("Workspace")
         self.lbl_log = QtGui.QLabel("Message")
+        self.lbl_user = QtGui.QLabel("Username :")
+        self.lbl_user_value = QtGui.QLabel("")
 
         #grid assign
         self.grid.addWidget(self.lbl_status, 0, 0, 1, 2)
         self.grid.addWidget(self.lbl_status_value, 0, 2, 1, 2)
-        self.grid.addWidget(self.btn_write_right, 1, 0, 1, 2)
-        self.grid.addWidget(self.btn_give_up_right, 1, 2, 1, 2)
-        self.grid.addWidget(self.lbl_textbox, 2, 0, 1, 4)
-        self.grid.addWidget(self.te_workspace, 3, 0, 4, 4)
-        self.grid.addWidget(self.lbl_log, 7, 0, 1, 4)
-        self.grid.addWidget(self.te_log, 8, 0, 4, 4)
+        self.grid.addWidget(self.lbl_user, 1, 0, 1, 2)
+        self.grid.addWidget(self.lbl_user_value, 1, 2, 1, 2)
+        self.grid.addWidget(self.btn_write_right, 2, 0, 1, 2)
+        self.grid.addWidget(self.btn_give_up_right, 2, 2, 1, 2)
+        self.grid.addWidget(self.lbl_textbox, 3, 0, 1, 4)
+        self.grid.addWidget(self.te_workspace, 4, 0, 4, 4)
+        self.grid.addWidget(self.lbl_log, 8, 0, 1, 4)
+        self.grid.addWidget(self.te_log, 9, 0, 4, 4)
 
         self.show()
 
@@ -110,13 +114,23 @@ class client_form(QtGui.QMainWindow):
         d = client_dialog.connect_dialog(self)
         d.connect_trigger = self.connect_to_server
 
+    def write_update(self, user_id):
+        if self.connection_thread is not None:
+            self.append_log("User [%s] is now possessing the write token !" % user_id)
+
     def connect_to_server(self, hostname, port):
         #WORKSPACE-01
         if self.connection_thread is None:
             self.connection_thread = client_thread(self, hostname, port)
             self.connection_thread.workspace_received.connect(self.workspace_received)
             self.connection_thread.write_status_changed.connect(self.write_status_changed)
+            self.connection_thread.write_update.connect(self.write_update)
+            self.connection_thread.user_assigned.connect(self.user_assigned)
+            self.connection_thread.message_received.connect(self.message_received)
             self.connection_thread.start()
+
+    def message_received(self, message):
+        self.append_log(message)
 
     def disconnect_action(self):
         if self.connection_thread is not None:
@@ -136,6 +150,9 @@ class client_form(QtGui.QMainWindow):
         if self.connection_thread is not None:
             diff = self.connection_thread.client.make_diff(str(self.te_workspace.toPlainText()))
             self.connection_thread.release_right(diff)
+
+    def user_assigned(self, user_id):
+        self.lbl_user_value.setText(user_id)
 
     def quit(self):
         self.disconnect_action()

@@ -3,7 +3,8 @@ import socket
 import sys
 from handle_connection import handle_connection
 import workspace
-
+import random
+import packet
 
 class server:
 
@@ -23,6 +24,46 @@ class server:
 
         self.run = True
         self.threads = []
+
+        self.usernames = []
+
+        self.load_users()
+
+    def get_thread(self, connection_id):
+        for c in self.threads:
+            if c.connection_id == connection_id:
+                return c
+
+        return None
+
+    def send_message(self, message, excludes=[]):
+        for c in self.threads:
+            if c.connection_id not in excludes:
+                p = packet.packet()
+                p.packet_type = packet.packet.Message
+                p.put_field("message", message)
+                c.queued_packets.append(p)
+
+    def load_users(self):
+
+        fp = open('mock_users.txt', 'r')
+
+        lines = fp.readlines()
+
+        fp.close()
+
+        for l in lines:
+            name = l.rstrip('\n')
+            name = name.rstrip('\r')
+
+            if len(name) > 0:
+                self.usernames.append(name)
+
+    def get_username(self):
+        i = random.randint(0, len(self.usernames) - 1)
+        user = self.usernames.pop(i)
+        return user
+
 
     def next_in_queued(self):
         if len(self.access_queued) > 0:

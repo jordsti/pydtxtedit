@@ -33,6 +33,9 @@ class client:
 
         self.workspace_received = None
         self.write_status_changed = None
+        self.write_update = None
+        self.user_assigned = None
+        self.message_received = None
 
         self.queued_packets = []
         self.sent_packets = []
@@ -42,6 +45,14 @@ class client:
 
         #event handling
         self.disconnected = None
+
+    def __user_assigned(self):
+        if self.user_assigned is not None:
+            self.user_assigned()
+
+    def __message_recevied(self, message):
+        if self.message_received is not None:
+            self.message_received(message)
 
     def make_diff(self, new_text):
         new_workspace = workspace.workspace(new_text)
@@ -102,6 +113,8 @@ class client:
 
                     if recv_packet.packet_type == packet.UserIdAssignation:
                         self.user_id = recv_packet.fields['user_id']
+                        self.__user_assigned()
+
                         text_data = recv_packet.get_field("workspace")
                         self.workspace.set_data(text_data)
                         self.__workspace_received()
@@ -140,6 +153,17 @@ class client:
                         if not diff.is_empty():
                             self.workspace.apply_diff(diff)
                             self.__workspace_received()
+
+                    elif recv_packet.packet_type == packet.WriteUpdate:
+                        user_id = recv_packet.get_field("id")
+
+                        if self.write_update is not None:
+                            print user_id
+                            self.write_update(user_id)
+
+                    elif recv_packet.packet_type == packet.Message:
+                        msg = recv_packet.get_field("message")
+                        self.__message_recevied(msg)
 
             except socket.error as e:
                 print "Socket error [%s, %s]" % (e.errno, e.strerror)

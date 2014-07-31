@@ -38,16 +38,17 @@ class handle_connection(threading.Thread):
 
     def __generate_user_id(self):
         if self.user_id is None:
-            sha2 = hashlib.sha256()
+            #sha2 = hashlib.sha256()
 
-            nb = random.randint(0, 100000)
-            stamp = time.time()
+            #nb = random.randint(0, 100000)
+            #stamp = time.time()
 
-            data = "%d|%d|%s|%d" % (stamp, nb, self.address[0], self.address[1])
+            #data = "%d|%d|%s|%d" % (stamp, nb, self.address[0], self.address[1])
 
-            sha2.update(data)
+            #sha2.update(data)
 
-            self.user_id = sha2.hexdigest()
+            #self.user_id = sha2.hexdigest()
+            self.user_id = self.master.get_username()
             self.master.debug("User id : %s" % self.user_id)
 
     def run(self):
@@ -76,6 +77,20 @@ class handle_connection(threading.Thread):
                         send_packet.fields['user_id'] = self.user_id
                         send_packet.fields['workspace'] = self.master.workspace.get_data()
                         self.queued_packets.append(send_packet)
+
+                        if self.master.access_write is not None:
+                            c = self.master.get_thread(self.master.access_write)
+                            if c is not None:
+                                p = packet()
+                                p.packet_type = packet.Message
+                                p.put_field("message", "User [%s] is now possessing the write token !" % c.user_id)
+                                self.queued_packets.append(p)
+                        else:
+                                p = packet()
+                                p.packet_type = packet.Message
+                                p.put_field("message", "Nobody is possessing the write token")
+                                self.queued_packets.append(p)
+
                     else:
                         self.__error("User Id already assigned")
                 elif recv_packet.packet_type == packet.Ping:
@@ -97,6 +112,7 @@ class handle_connection(threading.Thread):
                     if self.master.access_write is None:
                         self.master.access_write = self.connection_id
                         access = True
+                        self.__write_right_update()
                     else:
                         self.master.debug("[%d] a client is added to the right to write waiting list, packet id: (%d)" % (self.connection_id, recv_packet.packet_id))
                         self.master.adding_access_queued(self.connection_id)
@@ -138,6 +154,8 @@ class handle_connection(threading.Thread):
 
                         else:
                             print "[%d] access_waiting is smaller <= 0" % self.connection_id
+                            self.master.send_message('Write token is now free !')
+
                     elif self.connection_id in self.master.access_queued:
                         print "[%d] Releasing right when in waiting list: %d" % (self.connection_id, self.connection_id)
                         self.master.access_queued.remove(self.connection_id)
@@ -179,6 +197,15 @@ class handle_connection(threading.Thread):
                 c.queued_packets.append(p)
 
 
+    def __write_right_update(self):
+        for c in self.master.threads:
+            if not c.connection_id == self.connection_id:
+                p = packet()
+                p.packet_type = packet.WriteUpdate
+                p.put_field('id', self.user_id)
+                c.queued_packets.append(p)
+
+
     def __error(self, message):
         error_packet = packet()
         error_packet.packet_type = packet.Error
@@ -201,6 +228,9 @@ class handle_connection(threading.Thread):
             send_packet.put_field("is_waiting", False)
             self.queued_packets.append(send_packet)
             print "Next inline packet: " + send_packet.to_string()
+
+            self.__write_right_update()
+
         else:
             print "handle connection, next inline case not implemented "
 

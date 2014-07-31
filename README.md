@@ -18,9 +18,9 @@ Just add '-d' or '--debug'
 
 ### TO DO
 
- - Who possess the write token !?!
+ - ~~Who possess the write token !?!~~ DONE
  
- - Username (Random names list, server took a random name when the user initiate the connection)
+ - ~~Username (Random names list, server took a random name when the user initiate the connection)~~ DONE
 
  - Lamport Logic Clock [Wikipedia page](http://en.wikipedia.org/wiki/Lamport_timestamps)
  
