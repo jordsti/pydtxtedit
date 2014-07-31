@@ -1,4 +1,23 @@
-__author__ = 'JordSti'
+'''
+ Cours : LOG735
+ Session : Été 2014
+ Groupe : 01
+ Projet : Projet: editeur de texte distribue
+ Étudiants :
+    Jordan Guérin
+    Frederic Langlois
+ Code(s) perm. :
+    GUEJ06118807
+    LANF07078402
+ Date :
+    creation:
+    modification:
+ ==================================================================
+ Description of file
+
+ Pour tester les packets qu'on utilise dans le systeme
+ ==================================================================
+'''
 import packet
 
 def print_packet(p):

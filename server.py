@@ -1,4 +1,27 @@
-__author__ = 'JordSti'
+'''
+ Cours : LOG735
+ Session : Été 2014
+ Groupe : 01
+ Projet : Projet: editeur de texte distribue
+ Étudiants :
+    Jordan Guérin
+    Frederic Langlois
+ Code(s) perm. :
+    GUEJ06118807
+    LANF07078402
+ Date :
+    creation:
+    modification:
+ ==================================================================
+ Description of file
+
+ Gestion
+    -workspace commun
+    -acces des droits d'écritures
+    -file d'attente pour les droits d'écritures
+    -connections avec les différents clients
+ ==================================================================
+'''
 import socket
 import sys
 from handle_connection import handle_connection

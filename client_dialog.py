@@ -1,4 +1,24 @@
-__author__ = 'JordSti'
+'''
+ Cours : LOG735
+ Session : Été 2014
+ Groupe : 01
+ Projet : Projet: editeur de texte distribue
+ Étudiants :
+    Jordan Guérin
+    Frederic Langlois
+ Code(s) perm. :
+    GUEJ06118807
+    LANF07078402
+ Date :
+    creation:
+    modification:
+ ==================================================================
+ Description of file
+
+ Interface pour la connection entre le client et le serveur
+ qui demande l'adresse IP et le port
+ ==================================================================
+'''
 from PyQt4 import QtGui, QtCore
 import server
 

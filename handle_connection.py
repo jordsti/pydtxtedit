@@ -1,4 +1,23 @@
-__author__ = 'JordSti'
+'''
+ Cours : LOG735
+ Session : Été 2014
+ Groupe : 01
+ Projet : Projet: editeur de texte distribue
+ Étudiants :
+    Jordan Guérin
+    Frederic Langlois
+ Code(s) perm. :
+    GUEJ06118807
+    LANF07078402
+ Date :
+    creation:
+    modification:
+ ==================================================================
+ Description of file
+
+ Gestion de la boucle de connection du coter serveur ce qui comprend la reception et l'envoi des messages
+ ==================================================================
+'''
 import threading
 import socket
 from packet import packet, packet_exception

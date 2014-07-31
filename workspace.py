@@ -1,4 +1,23 @@
-__author__ = 'JordSti'
+'''
+ Cours : LOG735
+ Session : Été 2014
+ Groupe : 01
+ Projet : Projet: editeur de texte distribue
+ Étudiants :
+    Jordan Guérin
+    Frederic Langlois
+ Code(s) perm. :
+    GUEJ06118807
+    LANF07078402
+ Date :
+    creation:
+    modification:
+ ==================================================================
+ Description of file
+
+ Model du data, pour l'editeur de texte
+ ==================================================================
+'''
 import os
 from packet import packet
 from workspace_diff import line_diff, workspace_diff
