@@ -24,6 +24,7 @@ import time
 import sys
 import lamport_clock
 
+
 class client_status:
     def __init__(self, can_write=False, is_waiting=False):
         self.can_write = can_write
@@ -78,7 +79,6 @@ class client:
 
         self.workspace.apply_diff(diff)
         return diff
-
 
     def get_client_status(self):
         return client_status(self.can_write, self.is_waiting)
