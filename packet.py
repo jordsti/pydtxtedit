@@ -35,7 +35,7 @@ def get_packet_id():
 
 
 #character escaping chars
-chars_table = { ',' : '--COMMA--' }
+chars_table = { ',' : '--COMMA--', ':' : '--..--' }
 
 def escape_chars(text):
     global chars_table
