@@ -89,7 +89,6 @@ class server:
         user = self.usernames.pop(i)
         return user
 
-
     def next_in_queued(self):
         if len(self.access_queued) > 0:
             success = False
