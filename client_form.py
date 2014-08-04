@@ -1,17 +1,14 @@
 '''
  Cours : LOG735
- Session : Été 2014
+ Session : Ete 2014
  Groupe : 01
- Projet : Projet: editeur de texte distribue
- Étudiants :
-    Jordan Guérin
+ Projet : editeur de texte distribue
+ Etudiants :
+    Jordan Guerin
     Frederic Langlois
  Code(s) perm. :
     GUEJ06118807
     LANF07078402
- Date :
-    creation:
-    modification:
  ==================================================================
  Description of file
 

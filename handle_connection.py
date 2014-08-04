@@ -1,10 +1,10 @@
 '''
  Cours : LOG735
- Session : Été 2014
+ Session : Ete 2014
  Groupe : 01
- Projet : Projet: editeur de texte distribue
- Étudiants :
-    Jordan Guérin
+ Projet : editeur de texte distribue
+ Etudiants :
+    Jordan Guerin
     Frederic Langlois
  Code(s) perm. :
     GUEJ06118807
@@ -15,7 +15,7 @@
  ==================================================================
  Description of file
 
- Gestion de la boucle de connection du coter serveur ce qui comprend la reception et l'envoi des messages
+ Gestion de la boucle de connection du cote serveur ce qui comprend la reception et l'envoi des messages
  ==================================================================
 '''
 import threading
@@ -125,6 +125,7 @@ class handle_connection(threading.Thread):
                 elif recv_packet.packet_type == packet.Right:
                     self.master.debug("[%d] a client is asking for the right to write, packet id: (%d)" % (self.connection_id, recv_packet.packet_id))
                     send_packet = packet()
+                    send_packet.stamp = self.master.lamport.increment()
                     send_packet.packet_type = packet.Right
                     is_waiting = False
 
@@ -160,6 +161,7 @@ class handle_connection(threading.Thread):
                         self.master.access_write = None
                         print "[%d] Releasing write access" % self.connection_id
                         send_packet = packet()
+                        send_packet.stamp = self.master.lamport.increment()
                         send_packet.packet_type = packet.Right
                         send_packet.put_field('can_write', str(False))
                         send_packet.put_field('is_waiting', str(False))

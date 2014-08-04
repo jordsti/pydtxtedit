@@ -1,10 +1,10 @@
 '''
  Cours : LOG735
- Session : Été 2014
+ Session : Ete 2014
  Groupe : 01
- Projet : Projet: editeur de texte distribue
- Étudiants :
-    Jordan Guérin
+ Projet : Projet editeur de texte distribue
+ Etudiants :
+    Jordan Guerin
     Frederic Langlois
  Code(s) perm. :
     GUEJ06118807
@@ -17,9 +17,9 @@
 
  Gestion
     -workspace commun
-    -acces des droits d'écritures
-    -file d'attente pour les droits d'écritures
-    -connections avec les différents clients
+    -acces des droits d'ecritures
+    -file d'attente pour les droits d'ecritures
+    -connections avec les differents clients
  ==================================================================
 '''
 import socket
@@ -28,6 +28,7 @@ from handle_connection import handle_connection
 import workspace
 import random
 import packet
+import lamport_clock
 
 class server:
 
@@ -35,6 +36,7 @@ class server:
     (NormalMode, DebugMode) = (0, 1)
 
     def __init__(self, port=DefaultPort, workspace_file=DefaultWorkspace, max_connections=MaxConnections, mode=NormalMode):
+        self.lamport = lamport_clock.lamport_clock()
         self.mode = mode
         self.port = port
         self.workspace_file = workspace_file

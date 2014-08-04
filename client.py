@@ -1,17 +1,14 @@
 '''
  Cours : LOG735
- Session : Été 2014
+ Session : Ete 2014
  Groupe : 01
  Projet : Projet: editeur de texte distribue
- Étudiants :
-    Jordan Guérin
+ Etudiants :
+    Jordan Guerin
     Frederic Langlois
  Code(s) perm. :
     GUEJ06118807
     LANF07078402
- Date :
-    creation:
-    modification:
  ==================================================================
  Description of file
 
@@ -25,7 +22,7 @@ import workspace
 import workspace_diff
 import time
 import sys
-
+import lamport_clock
 
 class client_status:
     def __init__(self, can_write=False, is_waiting=False):
@@ -61,6 +58,8 @@ class client:
         self.received_packets = []
 
         self.buffer_size = self.BufferSize
+
+        self.lamport = lamport_clock.lamport_clock()
 
         #event handling
         self.disconnected = None
@@ -130,6 +129,10 @@ class client:
                     self.__send(send_packet)
                     recv_packet = self.__receive()
 
+                    #stamp
+                    if recv_packet.stamp > 0:
+                        self.lamport.set_stamp(recv_packet)
+
                     if recv_packet.packet_type == packet.UserIdAssignation:
                         self.user_id = recv_packet.fields['user_id']
                         self.__user_assigned()
@@ -143,6 +146,10 @@ class client:
                 else:
                     if len(self.queued_packets) > 0:
                         q_packet = self.queued_packets[0]
+
+                        if q_packet.packet_type == packet.Right or q_packet.packet_type == packet.ReleaseRight:
+                            q_packet.stamp = self.lamport.increment()
+
                         self.__send(q_packet)
                         self.debug("queued packet send %s" % q_packet.to_string())
                         self.queued_packets.remove(q_packet)

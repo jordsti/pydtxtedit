@@ -1,21 +1,18 @@
 '''
  Cours : LOG735
- Session : Été 2014
+ Session : Ete 2014
  Groupe : 01
- Projet : Projet: editeur de texte distribue
- Étudiants :
-    Jordan Guérin
+ Projet : editeur de texte distribue
+ Etudiants :
+    Jordan Guerin
     Frederic Langlois
  Code(s) perm. :
     GUEJ06118807
     LANF07078402
- Date :
-    creation:
-    modification:
  ==================================================================
  Description of file
 
- structure des messages qui seront passé entre le client et le serveur
+ structure des messages qui seront passe entre le client et le serveur
  ==================================================================
 '''
 import random
@@ -68,6 +65,7 @@ class packet:
     def __init__(self, text_data=None):
         self.packet_id = -1
         self.packet_type = self.Ping
+        self.stamp = 0
         self.fields = {}
 
         if text_data is not None:
@@ -78,12 +76,13 @@ class packet:
             self.fields = {}
 
     def __from_string(self, text_data):
-        packet_pattern = re.compile("\\[Packet:(?P<packet_id>[0-9]+):(?P<packet_type>[\\-0-9]+)\\]\\((?P<packet_data>.*)\\)", re.DOTALL)
+        packet_pattern = re.compile("\\[Packet:(?P<packet_id>[0-9]+):(?P<packet_type>[\\-0-9]+):(?P<stamp>[0-9]+)\\]\\((?P<packet_data>.*)\\)", re.DOTALL)
         m = packet_pattern.match(text_data)
 
         if m:
             self.packet_id = int(m.group("packet_id"))
             self.packet_type = int(m.group("packet_type"))
+            self.stamp = int(m.group("stamp"))
             data = m.group("packet_data")
 
             if len(data) > 0:
@@ -126,6 +125,6 @@ class packet:
             data += fdata
 
         data = data.rstrip(',')
-        #[Packet:Id:Type](Data,...)
-        data = "[Packet:%d:%d](%s)" % (self.packet_id, self.packet_type, data)
+        #[Packet:Id:Type:Stamp](Data,...)
+        data = "[Packet:%d:%d:%d](%s)" % (self.packet_id, self.packet_type, self.stamp, data)
         return data
