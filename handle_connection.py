@@ -57,16 +57,7 @@ class handle_connection(threading.Thread):
 
     def __generate_user_id(self):
         if self.user_id is None:
-            #sha2 = hashlib.sha256()
 
-            #nb = random.randint(0, 100000)
-            #stamp = time.time()
-
-            #data = "%d|%d|%s|%d" % (stamp, nb, self.address[0], self.address[1])
-
-            #sha2.update(data)
-
-            #self.user_id = sha2.hexdigest()
             self.user_id = self.master.get_username()
             self.master.debug("User id : %s" % self.user_id)
 
@@ -155,7 +146,6 @@ class handle_connection(threading.Thread):
                             self.master.workspace.apply_diff(diff)
                             self.master.workspace.flush()
 
-                            #send the diff to other client !!
                             self.__workspace_update(diff)
 
                         self.master.access_write = None

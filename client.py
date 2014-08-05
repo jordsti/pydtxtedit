@@ -90,19 +90,12 @@ class client:
     def __write_status_changed(self):
         if self.write_status_changed is not None:
             self.write_status_changed(self.get_client_status())
-            #TODO write if you got the right
-            #TODO if release before got right do we remove it from list in server ??
-
-    def __write_status_quo(self):   #todo to be removed
-        if self.write_status_quo is not None:
-            #case possible: you don't have the right and ask for it ?
-            self.write_status_quo(self.get_client_status())
 
     def debug(self, message):
         if self.mode == self.DebugMode:
             print "[Debug] %s" % message
 
-        #output to log file maybe
+
 
     def __disconnected(self):
         if self.disconnected is not None:
@@ -165,13 +158,11 @@ class client:
                     elif recv_packet.packet_type == packet.Right:
                         can_write = recv_packet.get_bool('can_write')
                         is_waiting = recv_packet.get_bool('is_waiting')
-                        #FIXME why not just pass can_write in param to __write_status_changed???
+
                         self.can_write = can_write
                         self.is_waiting = is_waiting
                         self.__write_status_changed()
-                        #else:
-                        #FIXME maybe receive is number in line before he got the right ??
-                        #    self.__write_status_quo()
+
                     elif recv_packet.packet_type == packet.WorkspaceUpdate:
                         diff_data = recv_packet.get_field("diff")
                         diff = workspace_diff.workspace_diff(diff_data)
@@ -196,7 +187,7 @@ class client:
                 self.connected = False
                 self.__disconnected()
 
-            time.sleep(0.2) # little break
+            time.sleep(0.2)
 
     def __receive(self):
         sock_data = self.socket.recv(self.buffer_size)

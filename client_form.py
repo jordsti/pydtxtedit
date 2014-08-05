@@ -107,7 +107,6 @@ class client_form(QtGui.QMainWindow):
         self.te_workspace.setText(workspace.get_data())
 
     def write_status_changed(self, status):
-        #todo need to handle when the user is put into a queue!
         if status.can_write:
             self.btn_write_right.setEnabled(False)
             self.btn_give_up_right.setEnabled(True)
@@ -122,7 +121,6 @@ class client_form(QtGui.QMainWindow):
             self.te_workspace.setEnabled(False)
 
     def append_log(self, message):
-        #TODO WORKSPACE-05
         self.te_log.insertPlainText(message + '\n')
         self.te_log.moveCursor(QtGui.QTextCursor.End)
 

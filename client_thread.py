@@ -22,7 +22,7 @@ from packet import packet
 
 class client_thread(QtCore.QThread):
 
-    workspace_received = QtCore.pyqtSignal(object) #signal for multi-thread support !
+    workspace_received = QtCore.pyqtSignal(object)
     write_status_changed = QtCore.pyqtSignal(object)
     write_status_quo = QtCore.pyqtSignal(object)
     write_update = QtCore.pyqtSignal(object)
@@ -107,5 +107,4 @@ class client_thread(QtCore.QThread):
         p.packet_type = packet.ReleaseRight
         p = diff.fill_packet(p)
 
-        #todo need to send workspace diff with this
         self.client.queued_packets.append(p)
